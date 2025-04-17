@@ -30,6 +30,8 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+
+//Git Ve Fork entegre edildi!!!
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 SIM800C_Handle sim800c;
