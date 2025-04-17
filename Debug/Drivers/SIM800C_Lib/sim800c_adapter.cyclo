@@ -1,0 +1,4 @@
+../Drivers/SIM800C_Lib/sim800c_adapter.c:21:5:SIM800C_UART_Transmit_Adapter	1
+../Drivers/SIM800C_Lib/sim800c_adapter.c:33:5:SIM800C_UART_Receive_IT_Adapter	1
+../Drivers/SIM800C_Lib/sim800c_adapter.c:44:10:SIM800C_GetTick_Adapter	1
+../Drivers/SIM800C_Lib/sim800c_adapter.c:56:6:SIM800C_Delay_Adapter	1

@@ -1,0 +1,6 @@
+../Drivers/SIM800C_Lib/SIM800C.c:13:13:SIM800C_SendATCommand	32	static
+../Drivers/SIM800C_Lib/SIM800C.c:21:13:SIM800C_DebugPrint	24	static
+../Drivers/SIM800C_Lib/SIM800C.c:27:13:SIM800C_RxBuff_Clear	24	static
+../Drivers/SIM800C_Lib/SIM800C.c:33:6:SIM800C_Init	24	static
+../Drivers/SIM800C_Lib/SIM800C.c:53:6:SIM800C_RxCpltCallback	16	static
+../Drivers/SIM800C_Lib/SIM800C.c:76:6:SIM800C_Loop	16	static
