@@ -116,7 +116,6 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-
   SIM800C_Init(&sim800c, &huart1, &huart2);
 
   //SIM800C_Start(&sim800c);
@@ -130,7 +129,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      SIM800C_Loop(&sim800c);
+      SIM800C_Loop(&sim800c, 10);
 
   }
   /* USER CODE END 3 */

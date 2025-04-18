@@ -43,7 +43,7 @@ void SIM800C_Init(SIM800C_Handle *hSim, void *sim800cUart, void *debugUart)
 
     hSim->rxIndex = 0;
     hSim->responseReady   = false;
-    hSim->commandState    = CMD_NONE;
+    hSim->commandState    = CMD_START;
     hSim->lastCommandTime = hSim->GetTick();
 
     hSim->UartReceive_IT(hSim->sim800cUart, &hSim->rxChar, 1);
@@ -73,16 +73,19 @@ void SIM800C_RxCpltCallback(SIM800C_Handle *hSim)
 
 
 
-void SIM800C_Loop(SIM800C_Handle *hSim)
+void SIM800C_Loop(SIM800C_Handle *hSim, uint32_t sampleTime)
 {
 
-    if ((hSim->GetTick() - hSim->lastCommandTime) > 1000) {
+    if ((hSim->GetTick() - hSim->lastCommandTime) > sampleTime) {
 
         switch (hSim->commandState) {
 
-			case CMD_NONE:
+			case CMD_START:
+				SIM800C_SendATCommand(hSim, "AT");
+				break;
+
+			case CMD_EKO_0:
 				SIM800C_SendATCommand(hSim, "ATE0");
-				hSim->commandState = CMD_EKO_0;
 				break;
 
             case CMD_CMEE:
@@ -113,29 +116,40 @@ void SIM800C_Loop(SIM800C_Handle *hSim)
 
 			switch (hSim->commandState){
 
+			   case CMD_START:
+				  SIM800C_DebugPrint(hSim, "SIM800C is Started!\r\n");
+			      hSim->commandState = CMD_EKO_0;
+			   break;
+
 			   case CMD_EKO_0:
-				  hSim->commandState = CMD_CMEE;
 				  SIM800C_DebugPrint(hSim, "EKO Mode Off!\r\n");
+				  hSim->commandState = CMD_CMEE;
 			   break;
 
 			   case CMD_CMEE:
-				   hSim->commandState = CMD_CPIN;
 				   SIM800C_DebugPrint(hSim, "CMEE Mode On!\r\n");
+				   hSim->commandState = CMD_CPIN;
 			   break;
 
 			   case CMD_CPIN:
-				   hSim->commandState = CMD_COMPLATED;
 				   SIM800C_DebugPrint(hSim, "Sim Card is OK!\r\n");
+				   hSim->commandState = CMD_COMPLATED;
 			   break;
 
 			   default:
-				   break;
+			   break;
 			}
 
 		}
 		else if (strstr(hSim->rxBuffer, "ERROR")){
 
 		   switch (hSim->commandState){
+
+			   case CMD_START:
+				  SIM800C_DebugPrint(hSim, "SIM800C is Fault! : ");
+				  SIM800C_DebugPrint(hSim, hSim->rxBuffer);
+				   hSim->commandState = CMD_ERROR;
+			   break;
 
 			   case CMD_EKO_0:
 				   SIM800C_DebugPrint(hSim, "EKO_0 Mode is Fault! : ");
@@ -156,8 +170,10 @@ void SIM800C_Loop(SIM800C_Handle *hSim)
 			   break;
 
 			   default:
-				   break;
+			   break;
 		   }
+
+
 		}
 
        SIM800C_RxBuff_Clear(hSim);

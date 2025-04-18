@@ -8,6 +8,13 @@
 #include "sim800c.h"
 #include "stm32f4xx_hal.h"
 
+/*
+ * Bu kütüphanedeki amaç her platforma uyumluluk sağlamasıdır. Eğer bu kütüphane düzgün kullanılır ise her mikrodenetleyicide sadece UART
+ * protokolü fonksiyonları kullanılarak kütüphaneyi hızlıca kullanabilriz. Alt kısımda bulunan MICROCONTROLLER makrosunu kullanarak
+ * mikrodenetleyicinizi seçebilirsiniz eğer mikrodenetleyiciniz listede yok ise aşşağıdaki _Adapter fonksiyonlarınızı güncelleyerek
+ * Aynı sayıda ve gerekli parametreleri fonksiyonunuza verecek şekilde kullanarak bukütüphaneyi kolaylıkla gullanavilirsiniz.
+ */
+
 
 /*   !> Hangi mikrodenetleyici kullanılıyorsa ona karşılık gelen değer seçilmeli.
  *   -> STM32 -> 1

@@ -18,7 +18,7 @@
 
 
 typedef enum {
-    CMD_NONE,
+	CMD_START,
 	CMD_EKO_0,
     CMD_CMEE,
     CMD_CPIN,
@@ -59,7 +59,7 @@ typedef struct {
 
 
 void SIM800C_Init(SIM800C_Handle *hSim, void *sim800cUart, void *debugUart);
-void SIM800C_Loop(SIM800C_Handle *hSim);
+void SIM800C_Loop(SIM800C_Handle *hSim, uint32_t sampleTime);
 void SIM800C_RxCpltCallback(SIM800C_Handle *hSim);
 
 
