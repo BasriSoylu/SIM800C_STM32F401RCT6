@@ -30,6 +30,7 @@ static void SIM800C_RxBuff_Clear(SIM800C_Handle *hSim)
     hSim->rxIndex = 0;
 }
 
+
 void SIM800C_Init(SIM800C_Handle *hSim, void *sim800cUart, void *debugUart)
 {
 	hSim->sim800cUart     = sim800cUart;
@@ -173,12 +174,10 @@ void SIM800C_Loop(SIM800C_Handle *hSim, uint32_t sampleTime)
 			   break;
 		   }
 
-
 		}
 
        SIM800C_RxBuff_Clear(hSim);
     }
-
 
 }
 

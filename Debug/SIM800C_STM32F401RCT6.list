@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  00015a4f  00000000  00000000  00010738  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00009e26  00000000  00000000  00026187  2**0
+ 17 .debug_line   00009e24  00000000  00000000  00026187  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00085476  00000000  00000000  0002ffad  2**0
+ 18 .debug_str    00085476  00000000  00000000  0002ffab  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000b5423  2**0
+ 19 .comment      00000043  00000000  00000000  000b5421  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00002224  00000000  00000000  000b5468  2**2
+ 20 .debug_frame  00002224  00000000  00000000  000b5464  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000096  00000000  00000000  000b768c  2**0
+ 21 .debug_line_str 00000096  00000000  00000000  000b7688  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -439,7 +439,7 @@ Disassembly of section .text:
  80005ba:	bf00      	nop
 
 080005bc <HAL_UART_RxCpltCallback>:
-
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
@@ -476,12 +476,12 @@ int main(void)
 {
  80005e4:	b580      	push	{r7, lr}
  80005e6:	af00      	add	r7, sp, #0
+  /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-	HAL_Init();
+  HAL_Init();
  80005e8:	f000 fca8 	bl	8000f3c <HAL_Init>
   /* USER CODE BEGIN Init */
 
@@ -513,8 +513,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      SIM800C_Loop(&sim800c, 10);
- 8000606:	210a      	movs	r1, #10
+      SIM800C_Loop(&sim800c, 1);
+ 8000606:	2101      	movs	r1, #1
  8000608:	4803      	ldr	r0, [pc, #12]	@ (8000618 <main+0x34>)
  800060a:	f000 fb61 	bl	8000cd0 <SIM800C_Loop>
  800060e:	e7fa      	b.n	8000606 <main+0x22>
@@ -1636,6 +1636,7 @@ static void SIM800C_RxBuff_Clear(SIM800C_Handle *hSim)
 
 08000bb0 <SIM800C_Init>:
 
+
 void SIM800C_Init(SIM800C_Handle *hSim, void *sim800cUart, void *debugUart)
 {
  8000bb0:	b580      	push	{r7, lr}
@@ -2060,14 +2061,12 @@ void SIM800C_Loop(SIM800C_Handle *hSim, uint32_t sampleTime)
  8000e84:	bf00      	nop
 		   }
 
-
 		}
 
        SIM800C_RxBuff_Clear(hSim);
  8000e86:	6878      	ldr	r0, [r7, #4]
  8000e88:	f7ff fe7b 	bl	8000b82 <SIM800C_RxBuff_Clear>
     }
-
 
 }
  8000e8c:	bf00      	nop

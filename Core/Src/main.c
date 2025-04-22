@@ -51,7 +51,8 @@ SIM800C_Handle sim800c;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
@@ -61,8 +62,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         SIM800C_RxCpltCallback(&sim800c);
     }
 }
-
-
 
 
 /* USER CODE END PV */
@@ -96,8 +95,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -129,9 +127,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      SIM800C_Loop(&sim800c, 10);
+      SIM800C_Loop(&sim800c, 1);
 
   }
+
+
   /* USER CODE END 3 */
 }
 
