@@ -127,7 +127,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      SIM800C_Loop(&sim800c, 1);
+      SIM800C_Loop(&sim800c, 0);
 
   }
 

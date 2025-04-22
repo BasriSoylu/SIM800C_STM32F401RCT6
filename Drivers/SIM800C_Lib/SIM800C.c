@@ -9,6 +9,14 @@
 #include <stdio.h>
 
 
+SIM800C_CommandStep sim800cSteps[] = {
+    { "AT",        "SIM800C is Started!\r\n" },
+    { "ATE0",      "EKO Mode Off!\r\n"       },
+    { "AT+CMEE=2", "CMEE Mode On!\r\n"       },
+    { "AT+CPIN?",  "Sim Card is OK!\r\n"     }
+};
+
+
 
 static void SIM800C_SendATCommand(SIM800C_Handle *hSim, const char *cmd)
 {
@@ -74,112 +82,177 @@ void SIM800C_RxCpltCallback(SIM800C_Handle *hSim)
 
 
 
+
 void SIM800C_Loop(SIM800C_Handle *hSim, uint32_t sampleTime)
 {
+    static SIM800C_FSM fsm = { .state = STATE_INIT, .commandIndex = 0 };
 
-    if ((hSim->GetTick() - hSim->lastCommandTime) > sampleTime) {
+    switch (fsm.state)
+    {
+        case STATE_INIT:
+            fsm.commandIndex = 0;
+            fsm.state = STATE_SEND_COMMAND;
+            break;
 
-        switch (hSim->commandState) {
+        case STATE_SEND_COMMAND:
+            if ((hSim->GetTick() - hSim->lastCommandTime) > sampleTime && fsm.commandIndex < COMMAND_COUNT) {
+                SIM800C_SendATCommand(hSim, sim800cSteps[fsm.commandIndex].command);
+                hSim->lastCommandTime = hSim->GetTick();
+                fsm.state = STATE_WAIT_RESPONSE;
+            }
+            break;
 
-			case CMD_START:
-				SIM800C_SendATCommand(hSim, "AT");
-				break;
+        case STATE_WAIT_RESPONSE:
+            if (hSim->responseReady)
+            {
+                hSim->responseReady = false;
 
-			case CMD_EKO_0:
-				SIM800C_SendATCommand(hSim, "ATE0");
-				break;
+                if (strstr(hSim->rxBuffer, "OK"))
+                {
+                    fsm.state = STATE_PROCESS_OK;
+                    SIM800C_RxBuff_Clear(hSim);
+                }
+                else if (strstr(hSim->rxBuffer, "ERROR"))
+                {
+                    fsm.state = STATE_PROCESS_ERR;
+                }
 
-            case CMD_CMEE:
-                SIM800C_SendATCommand(hSim, "AT+CMEE=2");
-                break;
+            }
+            break;
 
-            case CMD_CPIN:
-                SIM800C_SendATCommand(hSim, "AT+CPIN?");
-                break;
+        case STATE_PROCESS_OK:
+            SIM800C_DebugPrint(hSim, sim800cSteps[fsm.commandIndex].successMsg);
+            fsm.commandIndex++;
+            fsm.state = (fsm.commandIndex >= COMMAND_COUNT) ? STATE_DONE : STATE_SEND_COMMAND;
+            break;
 
-            case CMD_COMPLATED:
+        case STATE_PROCESS_ERR:
+            SIM800C_DebugPrint(hSim, "---------------- Command Error -------------");
+            SIM800C_DebugPrint(hSim, hSim->rxBuffer);
+            SIM800C_DebugPrint(hSim, "------------------------------------------------------\r\n");
+            SIM800C_RxBuff_Clear(hSim);
+            fsm.state = STATE_ERROR;
+            break;
 
-                break;
+        case STATE_DONE:
+            SIM800C_DebugPrint(hSim, "All SIM800C Commands Done.\r\n");
+            // FSM burada beklemede kalabilir veya tekrar başlatılabilir.
+            break;
 
-
-            default:
-                break;
-        }
-        hSim->lastCommandTime =  hSim->GetTick();
+        case STATE_ERROR:
+            //SIM800C_DebugPrint(hSim, "FSM entered ERROR state!\r\n");
+            // Hata işleme yapılabilir (reset, retry vs.)
+            break;
     }
-
-
-	if (hSim->responseReady) {
-
-		hSim->responseReady = false;
-
-		if (strstr(hSim->rxBuffer, "OK")){
-
-			switch (hSim->commandState){
-
-			   case CMD_START:
-				  SIM800C_DebugPrint(hSim, "SIM800C is Started!\r\n");
-			      hSim->commandState = CMD_EKO_0;
-			   break;
-
-			   case CMD_EKO_0:
-				  SIM800C_DebugPrint(hSim, "EKO Mode Off!\r\n");
-				  hSim->commandState = CMD_CMEE;
-			   break;
-
-			   case CMD_CMEE:
-				   SIM800C_DebugPrint(hSim, "CMEE Mode On!\r\n");
-				   hSim->commandState = CMD_CPIN;
-			   break;
-
-			   case CMD_CPIN:
-				   SIM800C_DebugPrint(hSim, "Sim Card is OK!\r\n");
-				   hSim->commandState = CMD_COMPLATED;
-			   break;
-
-			   default:
-			   break;
-			}
-
-		}
-		else if (strstr(hSim->rxBuffer, "ERROR")){
-
-		   switch (hSim->commandState){
-
-			   case CMD_START:
-				  SIM800C_DebugPrint(hSim, "SIM800C is Fault! : ");
-				  SIM800C_DebugPrint(hSim, hSim->rxBuffer);
-				   hSim->commandState = CMD_ERROR;
-			   break;
-
-			   case CMD_EKO_0:
-				   SIM800C_DebugPrint(hSim, "EKO_0 Mode is Fault! : ");
-				   SIM800C_DebugPrint(hSim, hSim->rxBuffer);
-				   hSim->commandState = CMD_ERROR;
-			   break;
-
-			   case CMD_CMEE:
-				   SIM800C_DebugPrint(hSim, "CMEE Mode is Fault! : ");
-				   SIM800C_DebugPrint(hSim, hSim->rxBuffer);
-				   hSim->commandState = CMD_ERROR;
-			   break;
-
-			   case CMD_CPIN:
-				   SIM800C_DebugPrint(hSim, "CPIN is Fault! : ");
-				   SIM800C_DebugPrint(hSim, hSim->rxBuffer);
-				   hSim->commandState = CMD_ERROR;
-			   break;
-
-			   default:
-			   break;
-		   }
-
-		}
-
-       SIM800C_RxBuff_Clear(hSim);
-    }
-
 }
+
+
+//void SIM800C_Loop(SIM800C_Handle *hSim, uint32_t sampleTime)
+//{
+//
+//    if ((hSim->GetTick() - hSim->lastCommandTime) > sampleTime) {
+//
+//        switch (hSim->commandState) {
+//
+//			case CMD_START:
+//				SIM800C_SendATCommand(hSim, "AT");
+//				break;
+//
+//			case CMD_EKO_0:
+//				SIM800C_SendATCommand(hSim, "ATE0");
+//				break;
+//
+//            case CMD_CMEE:
+//                SIM800C_SendATCommand(hSim, "AT+CMEE=2");
+//                break;
+//
+//            case CMD_CPIN:
+//                SIM800C_SendATCommand(hSim, "AT+CPIN?");
+//                break;
+//
+//            case CMD_COMPLATED:
+//
+//                break;
+//
+//
+//            default:
+//                break;
+//        }
+//        hSim->lastCommandTime =  hSim->GetTick();
+//    }
+//
+//
+//	if (hSim->responseReady) {
+//
+//		hSim->responseReady = false;
+//
+//		if (strstr(hSim->rxBuffer, "OK")){
+//
+//			switch (hSim->commandState){
+//
+//			   case CMD_START:
+//				  SIM800C_DebugPrint(hSim, "SIM800C is Started!\r\n");
+//			      hSim->commandState = CMD_EKO_0;
+//			   break;
+//
+//			   case CMD_EKO_0:
+//				  SIM800C_DebugPrint(hSim, "EKO Mode Off!\r\n");
+//				  hSim->commandState = CMD_CMEE;
+//			   break;
+//
+//			   case CMD_CMEE:
+//				   SIM800C_DebugPrint(hSim, "CMEE Mode On!\r\n");
+//				   hSim->commandState = CMD_CPIN;
+//			   break;
+//
+//			   case CMD_CPIN:
+//				   SIM800C_DebugPrint(hSim, "Sim Card is OK!\r\n");
+//				   hSim->commandState = CMD_COMPLATED;
+//			   break;
+//
+//			   default:
+//			   break;
+//			}
+//
+//		}
+//		else if (strstr(hSim->rxBuffer, "ERROR")){
+//
+//		   switch (hSim->commandState){
+//
+//			   case CMD_START:
+//				  SIM800C_DebugPrint(hSim, "SIM800C is Fault! : ");
+//				  SIM800C_DebugPrint(hSim, hSim->rxBuffer);
+//				   hSim->commandState = CMD_ERROR;
+//			   break;
+//
+//			   case CMD_EKO_0:
+//				   SIM800C_DebugPrint(hSim, "EKO_0 Mode is Fault! : ");
+//				   SIM800C_DebugPrint(hSim, hSim->rxBuffer);
+//				   hSim->commandState = CMD_ERROR;
+//			   break;
+//
+//			   case CMD_CMEE:
+//				   SIM800C_DebugPrint(hSim, "CMEE Mode is Fault! : ");
+//				   SIM800C_DebugPrint(hSim, hSim->rxBuffer);
+//				   hSim->commandState = CMD_ERROR;
+//			   break;
+//
+//			   case CMD_CPIN:
+//				   SIM800C_DebugPrint(hSim, "CPIN is Fault! : ");
+//				   SIM800C_DebugPrint(hSim, hSim->rxBuffer);
+//				   hSim->commandState = CMD_ERROR;
+//			   break;
+//
+//			   default:
+//			   break;
+//		   }
+//
+//		}
+//
+//       SIM800C_RxBuff_Clear(hSim);
+//    }
+//
+//}
 
 
 

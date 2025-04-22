@@ -15,6 +15,8 @@
 
 #define SIM800_RX_BUFFER_SIZE   100
 #define SIM800_TX_BUFFER_SIZE   100
+#define COMMAND_COUNT (sizeof(sim800cSteps) / sizeof(sim800cSteps[0]))
+
 
 
 typedef enum {
@@ -53,6 +55,30 @@ typedef struct {
 	    void (*DelayMs)(uint32_t ms);
 
 } SIM800C_Handle;
+
+
+
+
+typedef enum {
+    STATE_INIT,          // Başlangıç
+    STATE_SEND_COMMAND,  // AT komutu gönderilecek
+    STATE_WAIT_RESPONSE, // Cevap bekleniyor
+    STATE_PROCESS_OK,    // OK cevabı alındı
+    STATE_PROCESS_ERR,   // ERROR cevabı alındı
+    STATE_DONE,          // Tüm işlemler tamam
+    STATE_ERROR          // Hata durumu
+} SIM800C_State;
+
+typedef struct {
+    SIM800C_State state;
+    uint8_t commandIndex;
+} SIM800C_FSM;
+
+typedef struct {
+    const char *command;
+    const char *successMsg;
+} SIM800C_CommandStep;
+
 
 
 
