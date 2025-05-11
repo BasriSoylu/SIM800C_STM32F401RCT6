@@ -2,5 +2,5 @@
 ../Drivers/SIM800C_Lib/SIM800C.c:29:13:SIM800C_DebugPrint	24	static
 ../Drivers/SIM800C_Lib/SIM800C.c:35:13:SIM800C_RxBuff_Clear	24	static
 ../Drivers/SIM800C_Lib/SIM800C.c:42:6:SIM800C_Init	24	static
-../Drivers/SIM800C_Lib/SIM800C.c:62:6:SIM800C_RxCpltCallback	16	static
-../Drivers/SIM800C_Lib/SIM800C.c:86:6:SIM800C_Loop	16	static
+../Drivers/SIM800C_Lib/SIM800C.c:61:6:SIM800C_RxCpltCallback	16	static
+../Drivers/SIM800C_Lib/SIM800C.c:85:6:SIM800C_Loop	16	static

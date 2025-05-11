@@ -19,17 +19,6 @@
 
 
 
-typedef enum {
-	CMD_START,
-	CMD_EKO_0,
-    CMD_CMEE,
-    CMD_CPIN,
-	CMD_COMPLATED,
-    CMD_DONE,
-	CMD_ERROR
-}Sim800CommandState;
-
-
 
 typedef struct {
 
@@ -44,7 +33,6 @@ typedef struct {
 	    uint8_t responseReady;
 
 	    uint32_t lastCommandTime;
-	    Sim800CommandState commandState;
 
 	    void *sim800cUart;
 	    void *debugUart;
@@ -69,10 +57,14 @@ typedef enum {
     STATE_ERROR          // Hata durumu
 } SIM800C_State;
 
+
+
 typedef struct {
     SIM800C_State state;
     uint8_t commandIndex;
 } SIM800C_FSM;
+
+
 
 typedef struct {
     const char *command;
